@@ -1,0 +1,9 @@
+#+TITLE:
+* evil-multiedit
+** M-d       find next occurrence
+** C-n       go to next occurrence
+** C-p       go to previous occurrence
+** RET       include / exclude occurrence
+** R         match all occurrences (visual state)
+* narrowing
+** SPC b -   narrow / widen
