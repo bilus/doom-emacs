@@ -69,9 +69,21 @@
 (toggle-frame-fullscreen)
 
 ;; Auto-save buffers when focus lost
-(after! super-save
-  (super-save-mode +1)
-    (add-to-list 'super-save-triggers 'ace-window))
+;; TODO: Seems to not work when switching windows/buffers with/without ace.
+(def-package! super-save
+  :config (progn
+            (super-save-mode +1)
+            (add-to-list 'super-save-triggers 'ace-window)))
+
+;;
+;; Org mode
+;;
+;;
+
+;; t --> org-todo (choose TODO > DONE etc.)
+(map! :after evil-org
+      :map evil-org-mode-map
+      :m "t" #'org-todo)
 
 ;;
 ;; Terminal
