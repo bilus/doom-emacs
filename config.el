@@ -70,7 +70,7 @@
 
 ;; Auto-save buffers when focus lost
 ;; TODO: Seems to not work when switching windows/buffers with/without ace.
-(def-package! super-save
+(use-package! super-save
   :config (progn
             (super-save-mode +1)
             (add-to-list 'super-save-triggers 'ace-window)))
@@ -112,5 +112,25 @@
 
 
 ;;
+;; Clojure
+;;
+
+(use-package! evil-cleverparens)
+(after! evil-cleverparens
+  (add-hook! clojure-mode #'evil-cleverparens-mode)
+  (add-hook! clojurescript-mode #'evil-cleverparens-mode))
+
+(map!
+  (:after clojure-mode
+   (:map clojure-mode-map
+     :leader
+     :n "\\" #'ivy-cider-apropos
+     :n "DEL" #'ivy-cider-browse-ns)))
+
+(setq cider-enhanced-cljs-completion-p nil)  ;; https://github.com/clojure-emacs/cider/issues/2714
+
+;;
 ;; Experimental
 ;;
+
+(setq tramp-remote-shell-executable "sh")

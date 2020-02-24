@@ -50,4 +50,22 @@
 ;; our package manager can't deal with; see raxod502/straight.el#279)
 ;(package! builtin-package :recipe (:branch "develop"))
 
-(package! super-save)  ;; Save buffer when focus lost.
+;;
+;; General
+;;
+(package! super-save)       ;; Save buffer when focus lost.
+
+
+;;
+;; Experimental
+;;
+;; TODO: Doesn't seem to really work, decide if want to use it at all remove here and from config.el.
+(package! kubernetes-tramp)  ;; TRAMP integration for kubernetes
+
+
+;;
+;; Clojure
+;;
+(package! evil-cleverparens) ;; paredit alternative
+(package! ivy-cider
+  :recipe (:host github :repo "rschmukler/ivy-cider"))
