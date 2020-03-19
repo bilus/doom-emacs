@@ -59,14 +59,18 @@
 
 ;; Map SPC w w to (dvorak-friendly) ace window selection.
 (map! :leader
-      :desc "ace-window" "w w" #'ace-window)
+      :desc "ace-window" "w w" #'ace-window
+      :desc "Search Project" "/" #'+default/search-project)
 
 (after! ace-window
   (setq aw-keys '(?a ?o ?e ?u ?i ?1 ?2 ?3 ?4 ?5)))
 
-
 ;; Start in full screen.
+(setq ns-use-native-fullscreen t)
 (toggle-frame-fullscreen)
+
+;; Do not show line numbers.
+(setq display-line-numbers-type nil)
 
 ;; Auto-save buffers when focus lost
 ;; TODO: Seems to not work when switching windows/buffers with/without ace.
@@ -75,15 +79,40 @@
             (super-save-mode +1)
             (add-to-list 'super-save-triggers 'ace-window)))
 
+;; Map SPC f / to autocomplete file name at point
+(map! :leader
+      :desc "Autocomplete path" "f /" #'comint-dynamic-complete-filename)
+
 ;;
 ;; Org mode
 ;;
 ;;
 
-;; t --> org-todo (choose TODO > DONE etc.)
-(map! :after evil-org
-      :map evil-org-mode-map
-      :m "t" #'org-todo)
+
+;; SPC m x - execute BEGIN_SRC code block
+(map! :localleader
+      :map org-mode-map
+      :desc "Exec src block" "x" #'org-babel-execute-src-block)
+
+(defun org-insert-clipboard-image (&optional file)
+  (interactive "F")
+  (shell-command (concat "pngpaste " file))
+  (insert (concat "[[" file "]]"))
+  (org-display-inline-images))
+
+;; SPC m I - insert image from clipboard
+(map! :localleader
+      :map org-mode-map
+      :desc "Insert clipboard PNG" "P" #'org-insert-clipboard-image)
+
+
+;; Latex: Generate source code blocks with highlighting and word-wrap.
+;; (add-to-list 'org-latex-packages-alist '("" "listings" nil))
+
+;; (setq org-latex-listings t)
+
+;; (setq org-latex-listings-options '(("breaklines" "true")))
+
 
 ;;
 ;; Terminal
@@ -130,7 +159,12 @@
 (setq cider-enhanced-cljs-completion-p nil)  ;; https://github.com/clojure-emacs/cider/issues/2714
 
 ;;
+;; Golang
+;;
+(setq gofmt-command "goimports")
+
+(add-hook 'before-save-hook 'gofmt-before-save)
+
+;;
 ;; Experimental
 ;;
-
-(setq tramp-remote-shell-executable "sh")
