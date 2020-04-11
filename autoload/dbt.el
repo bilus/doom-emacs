@@ -1,8 +1,6 @@
 ;;; ~/.doom.d/autoload/bigquery.el -*- lexical-binding: t; -*-
 ;;;
-;;; TODO: Ask to save buffer before dbt run/compile if unsaved
 ;;; TODO: Minor dbt-mode
-;;; TODO: Show some message after compilation finishes.
 
 
 (defun bilus-yaml-read-from-file (path)
@@ -14,7 +12,7 @@
   (save-match-data
     (replace-regexp-in-string "'" "\\\\'" str-val)))
 
-(defun inhibit-sentinel-messages (fun &rest args)
+(defun with-sentinel-message (fun msg &rest args)
   "Inhibit messages in all sentinels started by fun."
   (cl-letf* ((old-set-process-sentinel (symbol-function 'set-process-sentinel))
          ((symbol-function 'set-process-sentinel)
@@ -23,9 +21,10 @@
          old-set-process-sentinel
          process
          `(lambda (&rest args)
-            ;; (message "Finished")
+            (message (quote ,msg))
             (cl-letf (((symbol-function 'message) #'ignore))
               (apply (quote ,sentinel) args)))))))
+        (message "")
         (apply fun args)))
 
 ;; See: https://emacs.stackexchange.com/questions/47142/multiple-async-shell-command-commands-in-sequence
@@ -35,7 +34,7 @@
       (let ((inhibit-read-only t))
         (erase-buffer)
         (newline)
-        (inhibit-sentinel-messages #'async-shell-command (string-join cmds " && ") out-buf)
+        (with-sentinel-message #'async-shell-command "Finished." (string-join cmds " && ") out-buf)
         (setq buffer-read-only t)  ;; async-shell-command seems to reset it
         (pop-to-buffer out-buf)))))
 
