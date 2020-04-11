@@ -108,6 +108,10 @@
       :map org-mode-map
       :desc "Insert clipboard PNG" "P" #'org-insert-clipboard-image)
 
+;; Support org-roam note capture from within Chrome.
+(after! org-roam
+  (require 'org-roam-protocol))
+
 
 ;; Latex: Generate source code blocks with highlighting and word-wrap.
 ;; (add-to-list 'org-latex-packages-alist '("" "listings" nil))
