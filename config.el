@@ -153,6 +153,7 @@
 
 (use-package! evil-cleverparens)
 (after! evil-cleverparens
+  (add-hook! emacs-lisp-mode #'evil-cleverparens-mode)
   (add-hook! clojure-mode #'evil-cleverparens-mode)
   (add-hook! clojurescript-mode #'evil-cleverparens-mode))
 
