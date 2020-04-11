@@ -65,5 +65,10 @@
   :recipe (:host github :repo "rschmukler/ivy-cider"))
 
 ;;
+;; Kubernetes
+;;
+(package! kubel)
+(package! kubel-evil)
+;;
 ;; Experimental
 ;;

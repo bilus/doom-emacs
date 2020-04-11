@@ -166,7 +166,13 @@
 (add-hook 'before-save-hook 'gofmt-before-save)
 
 ;;
-;; Experimental
+;; Kubernetes
+;;
+(use-package! kubel)
+(use-package! kubel-evil)
+(map! :leader
+      :desc "kubel" "o k" #'kubel)
+
 
 ;;
 ;; Magit
