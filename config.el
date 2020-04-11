@@ -167,4 +167,9 @@
 
 ;;
 ;; Experimental
+
 ;;
+;; Magit
+;;
+;;
+(bilus-setup-smerge-hydra)
