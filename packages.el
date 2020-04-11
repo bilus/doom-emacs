@@ -71,6 +71,11 @@
 (package! kubel-evil)
 
 ;;
+;; Blogging
+;;
+(package! prodigy)
+
+;;
 ;; Go
 ;;
 (package! lsp-mode)

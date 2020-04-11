@@ -185,6 +185,30 @@
 
 
 ;;
+;; Blog
+;;
+(setq org-publish-project-alist
+      '(("posts"
+         :base-directory "posts/"
+         :base-extension "org"
+         :publishing-directory "public/"
+         :recursive t
+         :postamble nil
+         :publishing-function org-twbs-publish-to-html
+         ;; :publishing-function org-html-publish-to-html
+         :auto-sitemap t)
+        ("all" :components ("posts"))))
+
+(prodigy-define-service
+  :name "bilus.dev@localhost"
+  :command "python2"
+  :args '("-m" "SimpleHTTPServer" "8123")
+  :cwd "~/dev/blog"
+  :tags '(file-server)
+  :stop-signal 'sigkill
+  :kill-process-buffer-on-stop t)
+
+;;
 ;; Magit
 ;;
 ;;
