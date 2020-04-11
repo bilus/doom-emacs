@@ -83,6 +83,9 @@
 (map! :leader
       :desc "Autocomplete path" "f /" #'comint-dynamic-complete-filename)
 
+(map! :leader
+      :desc "Widen" "b w" #'widen)
+
 ;;
 ;; Org mode
 ;;
