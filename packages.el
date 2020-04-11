@@ -69,6 +69,14 @@
 ;;
 (package! kubel)
 (package! kubel-evil)
+
+;;
+;; Go
+;;
+(package! lsp-mode)
+(package! lsp-ui)
+(package! company-lsp)
+
 ;;
 ;; Experimental
 ;;
