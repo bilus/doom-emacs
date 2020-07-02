@@ -86,3 +86,4 @@
 ;; Experimental/workarounds
 ;;
 (package! yaml-mode)  ;; yaml module is broken
+(package! feature-mode)
