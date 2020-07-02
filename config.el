@@ -117,6 +117,8 @@
 ;; Searching notes.
 (after! deft
   (setq deft-directory "/Users/martinb/git/org/roam"))
+;; Opens graphs in Chrome.
+(setq org-roam-graph-viewer "/usr/bin/open")
 
 (setq org-agenda-files '("~/git/org" "~/git/org/roam"))
 
