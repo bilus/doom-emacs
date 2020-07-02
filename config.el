@@ -228,3 +228,12 @@
 (setq auth-sources '("~/.authinfo"))  ;; Have forge use unencrypted file.
 
 
+(defun bilus/flycheck-prioritize-govet ()
+  (delete 'go-vet flycheck-checkers)
+  (add-to-list 'flycheck-checkers 'go-vet))
+
+;; Ensure go-vet is run before golangci-lint to avoid "Can't run linter goanalysis_metalinter",
+;; underscoring "package" instead of showing the location of the error, for any non-compilable Go source code,
+;; caused by golangci-lint expecting code to compile.
+(after! go-mode
+  (advice-add 'flycheck-golangci-lint-setup :after #'bilus/flycheck-prioritize-govet))
