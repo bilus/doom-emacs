@@ -112,6 +112,9 @@
 (after! org-roam
   (require 'org-roam-protocol))
 
+;; Searching notes.
+(after! deft
+  (setq deft-directory "/Users/martinb/git/org/roam"))
 
 ;; Latex: Generate source code blocks with highlighting and word-wrap.
 ;; (add-to-list 'org-latex-packages-alist '("" "listings" nil))
