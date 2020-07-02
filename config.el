@@ -228,6 +228,12 @@
 (setq auth-sources '("~/.authinfo"))  ;; Have forge use unencrypted file.
 
 
+;;
+;; Experimental
+;;
+(map! :leader
+      :desc "Connect Bluetooth device" "o h" #'ar/ivy-bluetooth-connect)
+
 (defun bilus/flycheck-prioritize-govet ()
   (delete 'go-vet flycheck-checkers)
   (add-to-list 'flycheck-checkers 'go-vet))
