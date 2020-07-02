@@ -218,3 +218,6 @@
 ;;
 ;;
 (bilus-setup-smerge-hydra)
+(setq auth-sources '("~/.authinfo"))  ;; Have forge use unencrypted file.
+
+
