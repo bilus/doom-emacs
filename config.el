@@ -35,6 +35,8 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 ;; (setq display-line-numbers-type t)
 
+;; Load env variables. Refresh using ~/.emacs.d/bin/doom env.
+(doom-load-envvars-file "~/.emacs.d/.local/env")
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
