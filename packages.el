@@ -78,9 +78,9 @@
 ;;
 ;; Go
 ;;
-(package! lsp-mode)
-(package! lsp-ui)
-(package! company-lsp)
+;; (package! lsp-mode)
+;; (package! lsp-ui)
+;; (package! company-lsp)
 
 ;;
 ;; Experimental

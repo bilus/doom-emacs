@@ -172,7 +172,7 @@
 ;; (setq gofmt-command "goimports")
 
 ;; (add-hook 'before-save-hook 'gofmt-before-save)
-(bilus-setup-go-lsp)
+;; (bilus-setup-go-lsp)
 
 
 ;;
