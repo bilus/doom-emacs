@@ -83,5 +83,6 @@
 ;; (package! company-lsp)
 
 ;;
-;; Experimental
+;; Experimental/workarounds
 ;;
+(package! yaml-mode)  ;; yaml module is broken
