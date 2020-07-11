@@ -78,6 +78,13 @@
 ;; Do not show line numbers.
 (setq display-line-numbers-type nil)
 
+;; Trim trailing newlines and lines on save.
+(defun bilus/cleanup-whitespaces ()
+  (delete-trailing-whitespace)
+  (doom/delete-trailing-newlines))
+
+(add-hook 'before-save-hook 'bilus/cleanup-whitespaces)
+
 ;; Auto-save buffers when focus lost
 ;; TODO: Seems to not work when switching windows/buffers with/without ace.
 (use-package! super-save
