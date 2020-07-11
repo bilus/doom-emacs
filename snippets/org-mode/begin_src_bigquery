@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: BEGIN_SRC bigquery
+# key:
+# --
+#+BEGIN_SRC bigquery :eval never-export :exports both
+#+END_SRC

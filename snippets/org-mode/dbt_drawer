@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dbt drawer
+# key: :PROPERTIES: dbt
+# --
+:PROPERTIES:
+:header-args:bigquery: :cmdline "--project_id conrad-analytics-staging --dataset_id dbt_production"
+:END:
