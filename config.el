@@ -99,6 +99,11 @@
 (map! :leader
       :desc "Widen" "b w" #'widen)
 
+;; I don’t use evil-escape-mode, so I may as well turn it off, I’ve heard it
+;; contributes a typing delay. I’m not sure it’s much, but it is an extra
+;; pre-command-hook that I don’t benefit from, so…
+(after! evil (evil-escape-mode nil))
+
 ;;
 ;; Org mode
 ;;
