@@ -160,6 +160,9 @@
 (map! :leader
       :desc "Fish term" "§" #'bilus/fish)
 
+;; Open eshell vertically.
+(set-popup-rule! "^\\*doom:eshell" :side 'right :size 0.2)
+
 ;;
 ;; Typescript
 ;;
