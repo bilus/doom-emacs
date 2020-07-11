@@ -115,7 +115,7 @@
       :map org-mode-map
       :desc "Exec src block" "x" #'org-babel-execute-src-block)
 
-(defun org-insert-clipboard-image (&optional file)
+(defun bilus/org-insert-clipboard-image (&optional file)
   (interactive "F")
   (shell-command (concat "pngpaste " file))
   (insert (concat "[[" file "]]"))
@@ -124,37 +124,33 @@
 ;; SPC m I - insert image from clipboard
 (map! :localleader
       :map org-mode-map
-      :desc "Insert clipboard PNG" "P" #'org-insert-clipboard-image)
+      :desc "Insert clipboard PNG" "P" #'bilus/org-insert-clipboard-image)
 
-;; Support org-roam note capture from within Chrome.
 (after! org-roam
-  (require 'org-roam-protocol))
+  (progn
+    ;; Enable org-roam minor mode.
+    (add-hook 'after-init-hook 'org-roam-mode)
+    ;; Support org-roam note capture from within Chrome.
+    (require 'org-roam-protocol)))
 
 ;; Searching notes.
 (after! deft
   (setq deft-directory "/Users/martinb/git/org/roam"))
-;; Opens graphs in Chrome.
+
+;; Open roam graphs in Chrome.
 (setq org-roam-graph-viewer "/usr/bin/open")
 
 (setq org-agenda-files '("~/git/org" "~/git/org/roam"))
 
-;; Latex: Generate source code blocks with highlighting and word-wrap.
-;; (add-to-list 'org-latex-packages-alist '("" "listings" nil))
-
-;; (setq org-latex-listings t)
-
-;; (setq org-latex-listings-options '(("breaklines" "true")))
-
-
 ;;
-;; Terminal
+;; Terminal/shell
 ;;
 
-(defun bilus-fish ()
+(defun bilus/fish ()
   (interactive)
   (if-let (fish (get-buffer "*ansi-term*"))
       (cond ((eq fish (window-buffer (selected-window)))
-             (message "Visible and focused"))
+             (message "Fish shell already focused"))
             ((get-buffer-window fish)
              (select-window (get-buffer-window fish)))
             (t
@@ -162,7 +158,7 @@
     (ansi-term "/usr/local/bin/fish")))
 
 (map! :leader
-      :desc "Fish term" "§" #'bilus-fish)
+      :desc "Fish term" "§" #'bilus/fish)
 
 ;;
 ;; Typescript
@@ -240,7 +236,7 @@
 ;; Magit
 ;;
 ;;
-(bilus-setup-smerge-hydra)
+(bilus/setup-smerge-hydra)
 (setq auth-sources '("~/.authinfo"))  ;; Have forge use unencrypted file.
 
 
@@ -259,3 +255,23 @@
 ;; caused by golangci-lint expecting code to compile.
 (after! go-mode
   (advice-add 'flycheck-golangci-lint-setup :after #'bilus/flycheck-prioritize-govet))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (exec-path-from-shell rvm org-roam-server keycast selectric-mode ox-hugo prodigy org-alert json-mode gherkin-mode evil-iedit-state))))
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:background "#21242b")))))
+
+;; Blogging
+(after! ox
+  (use-package! ox-hugo))
