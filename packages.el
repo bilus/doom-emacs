@@ -83,6 +83,11 @@
 ;; (package! company-lsp)
 
 ;;
+;; Ruby
+;;
+(package! rvm)
+
+;;
 ;; Experimental/workarounds
 ;;
 (package! yaml-mode)  ;; yaml module is broken
