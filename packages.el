@@ -53,7 +53,7 @@
 ;;
 ;; General
 ;;
-(package! super-save)       ;; Save buffer when focus lost.
+;; (package! super-save)       ;; Save buffer when focus lost.
 (package! evil-iedit-state)
 
 
@@ -67,30 +67,45 @@
 ;;
 ;; Kubernetes
 ;;
-(package! kubel)
-(package! kubel-evil)
+;; (package! kubel)
+;; (package! kubel-evil)
 
 ;;
 ;; Blogging
 ;;
-(package! prodigy)
+;; (package! prodigy)
 
 ;;
 ;; Go
 ;;
 ;; (package! lsp-mode)
 ;; (package! lsp-ui)
-;; (package! company-lsp)
+(package! company-lsp)
 
 ;;
 ;; Ruby
 ;;
-(package! rvm)
+;; (package! rvm)
+
+
+;;
+;; Python
+;;
+(package! yapfify)
 
 ;;
 ;; Experimental/workarounds
 ;;
 (package! yaml-mode)  ;; yaml module is broken
 (package! feature-mode)
+(package! evil-iedit-state)
 (package! ox-hugo)
 
+
+(package! ob-http)
+(package! ob-mermaid)
+
+;; (package! nix-haskell-mode)
+;; (package! org-roam-server)
+
+(package! org-reveal)

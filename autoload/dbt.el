@@ -51,15 +51,17 @@
 
 ;; See: https://emacs.stackexchange.com/questions/47142/multiple-async-shell-command-commands-in-sequence
 (defun dbt--run-commands (&rest cmds)
-  (let ((out-buf (dbt--compile-out-buf)))
+  (let ((out-buf (dbt--compile-out-buf))
+        (root-dir (dbt--project-dir)))
     (dbt--save-some-buffers (list (current-buffer)))
     (with-current-buffer out-buf
       (let ((inhibit-read-only t))
         (erase-buffer)
         (newline)
+        (setq default-directory root-dir)
         ;; (with-sentinel-message #'async-shell-command "Finished." (string-join cmds " && ") out-buf)
-        (compilation-start test-command-to-run 'mocha-compilation-mode (lambda (m) (buffer-name)))
-        (setq buffer-read-only t)  ;; async-shell-command seems to reset it
+        (compilation-start (string-join cmds " && ") 'dbt-compilation-mode (lambda (m) (buffer-name)))
+        ;; (setq buffer-read-only t)  ;; async-shell-command seems to reset it
         (pop-to-buffer out-buf)))))
 
 (defun dbt--bq-query (sql opts)
@@ -105,8 +107,8 @@
 
 (defun dbt--compile-out-buf ()
   (let ((buf (get-buffer-create "** DBT **")))
-    (with-current-buffer buf
-      (setq buffer-read-only t))
+    ;; (with-current-buffer buf
+    ;;   (setq buffer-read-only t)
     buf))
 
 (defun dbt--clear-compile-out-buf ()
@@ -180,5 +182,28 @@
       :map dbt-mode-map
       :desc "dbt-eval-sql" "e" #'dbt-eval-sql)
 
-;; (with-current-buffer (find-file-noselect "/Users/martinb/dev/Tooploox/DTS/conrad-analytics/data/analytics/models/genres.sql")
-;;   (dbt-eval-sql))
+(defun dbt--compilation-filter ()
+  "Filter function for compilation output."
+  (ansi-color-apply-on-region compilation-filter-start (point-max)))
+
+(define-compilation-mode dbt-compilation-mode "dbt"
+  "dbt compilation mode."
+  (progn
+    (add-hook 'compilation-filter-hook 'dbt--compilation-filter nil t)
+    ))
+
+;; (add-hook 'dbt-compilation-mode-hook
+          ;; (add-to-list 'compilation-error-regexp-alist '("Database Error.*\\n.*at \\[([^:]+):.*\\n\\s+compiled SQL at\\s(.+)\\n" 1 2)))
+
+
+;; (with-current-buffer (dbt--compile-out-buf)
+;;   (re-search-forward "Database Error.*\n.*at \\[([^:]+):.*\n\\s+compiled SQL at\\s(.+)\n"))
+
+;; (with-current-buffer (dbt--compile-out-buf)
+;;   (pop-to-buffer (current-buffer))
+;;   (goto-char (point-min))
+;;   (re-search-forward "Database Error.*at")
+;;   ;; (re-search-forward "Database Error.*\\n.*at \\[([^:]+):.*\\n\\s+compiled SQL at\\s(.+)\\n")
+;;   ;; (re-search-forward "Database Error.*\\n")
+
+;;   )
