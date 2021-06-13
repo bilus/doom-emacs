@@ -29,7 +29,8 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-Iosvkem)
+;; (setq doom-theme 'doom-dracula)
+(setq doom-theme 'doom-nord-light)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -72,8 +73,8 @@
   (setq aw-keys '(?a ?o ?e ?u ?i ?1 ?2 ?3 ?4 ?5)))
 
 ;; Start in full screen.
-(setq ns-use-native-fullscreen t)
-(toggle-frame-fullscreen)
+;; (setq ns-use-native-fullscreen t)
+;; (toggle-frame-fullscreen)
 
 ;; Do not show line numbers.
 (setq display-line-numbers-type nil)
@@ -87,10 +88,10 @@
 
 ;; Auto-save buffers when focus lost
 ;; TODO: Seems to not work when switching windows/buffers with/without ace.
-(use-package! super-save
-  :config (progn
-            (super-save-mode +1)
-            (add-to-list 'super-save-triggers 'ace-window)))
+;; (use-package! super-save
+;;   :config (progn
+;;             (super-save-mode +1)
+;;             (add-to-list 'super-save-triggers 'ace-window)))
 
 ;; Map SPC f / to autocomplete file name at point
 (map! :leader
@@ -122,9 +123,9 @@
   (org-display-inline-images))
 
 ;; SPC m I - insert image from clipboard
-(map! :localleader
-      :map org-mode-map
-      :desc "Insert clipboard PNG" "P" #'bilus/org-insert-clipboard-image)
+;; (map! :localleader
+;;       :map org-mode-map
+;;       :desc "Insert clipboard PNG" "P" #'bilus/org-insert-clipboard-image)
 
 (after! org-roam
   (progn
@@ -134,14 +135,28 @@
     (require 'org-roam-protocol)))
 
 ;; Searching notes.
-(after! deft
-  (setq deft-directory "/Users/martinb/git/org/roam"))
+;; Haven't been using it.
+;; (after! deft
+;;   (setq deft-directory "/Users/martinb/git/org/roam"))
 
 ;; Open roam graphs in Chrome.
 (setq org-roam-graph-viewer "/usr/bin/open")
 
 (setq org-agenda-files '("~/git/org" "~/git/org/roam"))
 
+;; Haven't been using it.
+;; (use-package org-roam-server
+;;   :ensure t
+;;   :config
+;;   (setq org-roam-server-host "127.0.0.1"
+;;         org-roam-server-port 8077
+;;         org-roam-server-export-inline-images t
+;;         org-roam-server-authenticate nil
+;;         org-roam-server-network-poll t
+;;         org-roam-server-network-arrows nil
+;;         org-roam-server-network-label-truncate t
+;;         org-roam-server-network-label-truncate-length 60
+;;         org-roam-server-network-label-wrap-length 20))
 ;;
 ;; Terminal/shell
 ;;
@@ -182,13 +197,30 @@
   (add-hook! clojurescript-mode #'evil-cleverparens-mode))
 
 (map!
-  (:after clojure-mode
-   (:map clojure-mode-map
-     :leader
-     :n "\\" #'ivy-cider-apropos
-     :n "DEL" #'ivy-cider-browse-ns)))
+ (:after clojure-mode
+  (:map clojure-mode-map
+   :leader
+   :n "\\" #'ivy-cider-apropos
+   :n "DEL" #'ivy-cider-browse-ns)))
 
 (setq cider-enhanced-cljs-completion-p nil)  ;; https://github.com/clojure-emacs/cider/issues/2714
+
+
+;; (after! cider
+;;   (defun clj-format ()
+;;     (save-excursion
+;;       (cider-format-buffer)))
+
+;;   (defun add-clj-format-before-save ()
+;;     (interactive)
+;;     (add-hook 'before-save-hook
+;;               'clj-format
+;;               t
+;;               t))
+
+;;   (add-hook 'clojure-mode-hook 'add-clj-format-before-save)
+;;   (add-hook 'clojurescript-mode-hook 'add-clj-format-before-save))
+
 
 ;;
 ;; Golang
@@ -200,40 +232,42 @@
 (setq gofmt-command "goimports")
 
 (add-hook 'before-save-hook 'gofmt-before-save)
+(use-package! company-lsp
+  :after (push 'company-lsp company-backends))
 
 
 ;;
 ;; Kubernetes
 ;;
-(use-package! kubel)
-(use-package! kubel-evil)
-(map! :leader
-      :desc "kubel" "o k" #'kubel)
+;; (use-package! kubel)
+;; (use-package! kubel-evil)
+;; (map! :leader
+;;       :desc "kubel" "o k" #'kubel)
 
 
 ;;
 ;; Blog
 ;;
-(setq org-publish-project-alist
-      '(("posts"
-         :base-directory "posts/"
-         :base-extension "org"
-         :publishing-directory "public/"
-         :recursive t
-         :postamble nil
-         :publishing-function org-twbs-publish-to-html
-         ;; :publishing-function org-html-publish-to-html
-         :auto-sitemap t)
-        ("all" :components ("posts"))))
+;; (setq org-publish-project-alist
+;;       '(("posts"
+;;          :base-directory "posts/"
+;;          :base-extension "org"
+;;          :publishing-directory "public/"
+;;          :recursive t
+;;          :postamble nil
+;;          :publishing-function org-twbs-publish-to-html
+;;          ;; :publishing-function org-html-publish-to-html
+;;          :auto-sitemap t)
+;;         ("all" :components ("posts"))))
 
-(prodigy-define-service
-  :name "bilus.dev@localhost"
-  :command "python2"
-  :args '("-m" "SimpleHTTPServer" "8123")
-  :cwd "~/dev/blog"
-  :tags '(file-server)
-  :stop-signal 'sigkill
-  :kill-process-buffer-on-stop t)
+;; (prodigy-define-service
+;;   :name "bilus.dev@localhost"
+;;   :command "python2"
+;;   :args '("-m" "SimpleHTTPServer" "8123")
+;;   :cwd "~/dev/blog"
+;;   :tags '(file-server)
+;;   :stop-signal 'sigkill
+;;   :kill-process-buffer-on-stop t)
 
 ;;
 ;; Magit
@@ -248,6 +282,19 @@
 (map! :localleader
       :map ruby-mode-map
       "v" #'rvm-use)
+
+
+;;
+;; Python
+;;
+(after! yapfify
+  (add-hook 'python-mode-hook 'yapf-mode))
+
+
+;;
+;; Org mode
+;;
+(setq org-plantuml-jar-path (expand-file-name "~/.emacs.d/bin/plantuml.jar"))
 
 ;;
 ;; Experimental
@@ -272,15 +319,25 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (exec-path-from-shell rvm org-roam-server keycast selectric-mode ox-hugo prodigy org-alert json-mode gherkin-mode evil-iedit-state))))
+    (direnv projectile-direnv ob-http exec-path-from-shell rvm org-roam-server keycast selectric-mode ox-hugo prodigy org-alert json-mode gherkin-mode evil-iedit-state))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:background "#21242b")))))
+ )
+
+(after! ob-mermaid
+  (setq ob-mermaid-cli-path "/usr/local/bin/mmdc"))
 
 ;; Blogging
 (after! ox
   (use-package! ox-hugo))
+
+(after! org-reveal
+  (setq org-reveal-root "https://revealjs.com/")
+  (setq org-reveal-title-slide nil))
+
+(after! elm-mode
+  (add-hook 'elm-mode-hook 'elm-format-on-save-mode))
