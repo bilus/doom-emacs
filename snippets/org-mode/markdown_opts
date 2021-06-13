@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: markdownopts
+# key: markdownopts
+# --
+
+#+OPTIONS: toc:nil
+#+OPTIONS:   H:1
+#+OPTIONS:   num:2
+#+OPTIONS: ^:nil

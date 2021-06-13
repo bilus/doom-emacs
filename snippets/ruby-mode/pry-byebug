@@ -1,0 +1,5 @@
+# -*- mode: ruby -*-
+# name: pry-byebug
+# key: pry-byebug
+# --
+require 'pry-byebug'; binding.pry

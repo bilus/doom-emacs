@@ -78,10 +78,19 @@
 ;;
 ;; Go
 ;;
-(package! lsp-mode)
-(package! lsp-ui)
-(package! company-lsp)
+;; (package! lsp-mode)
+;; (package! lsp-ui)
+;; (package! company-lsp)
 
 ;;
-;; Experimental
+;; Ruby
 ;;
+(package! rvm)
+
+;;
+;; Experimental/workarounds
+;;
+(package! yaml-mode)  ;; yaml module is broken
+(package! feature-mode)
+(package! ox-hugo)
+

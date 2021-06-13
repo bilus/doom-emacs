@@ -1,7 +1,7 @@
 ;;; ~/.doom.d/autoload/smerge-hydra.el -*- lexical-binding: t; -*-
 
 ;;;###autoload
-(defun bilus-setup-smerge-hydra ()
+(defun bilus/setup-smerge-hydra ()
   (use-package! smerge-mode
     :after hydra
     :config

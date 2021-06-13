@@ -20,12 +20,16 @@
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
 ;; (setq doom-font (font-spec :family "monospace" :size 14))
-(setq doom-font (font-spec :family "Fira Code" :size 13))
+(setq doom-font (font-spec :family "Hack" :size 13))
+
+(unless (find-font doom-font)
+  (setq doom-font (font-spec :family "Fira Code" :size 13)))
+
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-Iosvkem)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -35,6 +39,8 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 ;; (setq display-line-numbers-type t)
 
+;; Load env variables. Refresh using ~/.emacs.d/bin/doom env.
+(doom-load-envvars-file "~/.emacs.d/.local/env")
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
@@ -72,6 +78,13 @@
 ;; Do not show line numbers.
 (setq display-line-numbers-type nil)
 
+;; Trim trailing newlines and lines on save.
+(defun bilus/cleanup-whitespaces ()
+  (delete-trailing-whitespace)
+  (doom/delete-trailing-newlines))
+
+(add-hook 'before-save-hook 'bilus/cleanup-whitespaces)
+
 ;; Auto-save buffers when focus lost
 ;; TODO: Seems to not work when switching windows/buffers with/without ace.
 (use-package! super-save
@@ -86,6 +99,11 @@
 (map! :leader
       :desc "Widen" "b w" #'widen)
 
+;; I don’t use evil-escape-mode, so I may as well turn it off, I’ve heard it
+;; contributes a typing delay. I’m not sure it’s much, but it is an extra
+;; pre-command-hook that I don’t benefit from, so…
+(after! evil (evil-escape-mode nil))
+
 ;;
 ;; Org mode
 ;;
@@ -97,7 +115,7 @@
       :map org-mode-map
       :desc "Exec src block" "x" #'org-babel-execute-src-block)
 
-(defun org-insert-clipboard-image (&optional file)
+(defun bilus/org-insert-clipboard-image (&optional file)
   (interactive "F")
   (shell-command (concat "pngpaste " file))
   (insert (concat "[[" file "]]"))
@@ -106,30 +124,33 @@
 ;; SPC m I - insert image from clipboard
 (map! :localleader
       :map org-mode-map
-      :desc "Insert clipboard PNG" "P" #'org-insert-clipboard-image)
+      :desc "Insert clipboard PNG" "P" #'bilus/org-insert-clipboard-image)
 
-;; Support org-roam note capture from within Chrome.
 (after! org-roam
-  (require 'org-roam-protocol))
+  (progn
+    ;; Enable org-roam minor mode.
+    (add-hook 'after-init-hook 'org-roam-mode)
+    ;; Support org-roam note capture from within Chrome.
+    (require 'org-roam-protocol)))
 
+;; Searching notes.
+(after! deft
+  (setq deft-directory "/Users/martinb/git/org/roam"))
 
-;; Latex: Generate source code blocks with highlighting and word-wrap.
-;; (add-to-list 'org-latex-packages-alist '("" "listings" nil))
+;; Open roam graphs in Chrome.
+(setq org-roam-graph-viewer "/usr/bin/open")
 
-;; (setq org-latex-listings t)
-
-;; (setq org-latex-listings-options '(("breaklines" "true")))
-
+(setq org-agenda-files '("~/git/org" "~/git/org/roam"))
 
 ;;
-;; Terminal
+;; Terminal/shell
 ;;
 
-(defun bilus-fish ()
+(defun bilus/fish ()
   (interactive)
   (if-let (fish (get-buffer "*ansi-term*"))
       (cond ((eq fish (window-buffer (selected-window)))
-             (message "Visible and focused"))
+             (message "Fish shell already focused"))
             ((get-buffer-window fish)
              (select-window (get-buffer-window fish)))
             (t
@@ -137,7 +158,10 @@
     (ansi-term "/usr/local/bin/fish")))
 
 (map! :leader
-      :desc "Fish term" "§" #'bilus-fish)
+      :desc "Fish term" "§" #'bilus/fish)
+
+;; Open eshell vertically.
+(set-popup-rule! "^\\*doom:eshell" :side 'right :size 0.2)
 
 ;;
 ;; Typescript
@@ -172,7 +196,10 @@
 ;; (setq gofmt-command "goimports")
 
 ;; (add-hook 'before-save-hook 'gofmt-before-save)
-(bilus-setup-go-lsp)
+;; (bilus-setup-go-lsp)
+(setq gofmt-command "goimports")
+
+(add-hook 'before-save-hook 'gofmt-before-save)
 
 
 ;;
@@ -212,4 +239,48 @@
 ;; Magit
 ;;
 ;;
-(bilus-setup-smerge-hydra)
+(bilus/setup-smerge-hydra)
+(setq auth-sources '("~/.authinfo"))  ;; Have forge use unencrypted file.
+
+;;
+;; Ruby
+;;
+(map! :localleader
+      :map ruby-mode-map
+      "v" #'rvm-use)
+
+;;
+;; Experimental
+;;
+(map! :leader
+      :desc "Connect Bluetooth device" "o h" #'ar/ivy-bluetooth-connect)
+
+(defun bilus/flycheck-prioritize-govet ()
+  (delete 'go-vet flycheck-checkers)
+  (add-to-list 'flycheck-checkers 'go-vet))
+
+;; Ensure go-vet is run before golangci-lint to avoid "Can't run linter goanalysis_metalinter",
+;; underscoring "package" instead of showing the location of the error, for any non-compilable Go source code,
+;; caused by golangci-lint expecting code to compile.
+(after! go-mode
+  (advice-add 'flycheck-golangci-lint-setup :after #'bilus/flycheck-prioritize-govet))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (exec-path-from-shell rvm org-roam-server keycast selectric-mode ox-hugo prodigy org-alert json-mode gherkin-mode evil-iedit-state))))
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:background "#21242b")))))
+
+;; Blogging
+(after! ox
+  (use-package! ox-hugo))
