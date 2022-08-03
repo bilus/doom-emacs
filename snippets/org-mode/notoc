@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: notoc
-# key: notoc
-# --
-#+OPTIONS: toc:nil
