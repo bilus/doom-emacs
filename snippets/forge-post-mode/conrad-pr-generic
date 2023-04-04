@@ -1,0 +1,30 @@
+# -*- mode: forge-post-mode -*-
+# name: conrad-pr-generic
+# key: pr-generic
+# --
+### Review checklist:
+
+<!--
+Submitter Instructions:
+
+Any items in the checklist that do not apply to this PR should be struck
+through (using surrounding tilde characters, ~like so~) and a note explaining
+why added as a sub-point under that item.
+
+If this PR also includes library or service update(s), or staging
+deployment(s), add a header to this checklist and copy the relevant checklists
+from the template(s) in .github/PULL_REQUEST_TEMPLATE/ here as well.
+
+To signal to the reviewer that you as the submitter have checked each item,
+replace each ':x:' with ':heavy_check_mark:'; the reviewer will use the
+rendered checkboxes in the web interface.
+
+Vim command for check mark replacement:
+%s/:x:/:heavy_check_mark:/gc
+-->
+
+- [ ] :heavy_check_mark: \`make new_{major,minor,patch}_version\`
+  - [ ] :heavy_check_mark: Dependencies up to date
+  - [ ] :heavy_check_mark: Version bumped
+  - [ ] :heavy_check_mark: Changelog amended
+- [ ] :heavy_check_mark: Sanity checks passed (\`make check\`)

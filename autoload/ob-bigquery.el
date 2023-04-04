@@ -8,6 +8,8 @@
 (require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
+(require 'cl)
+
 ;; possibly require modes required for your language
 
 ;;;###autoload
@@ -19,10 +21,18 @@
 ;; optionally declare default header arguments for this language
 (defvar org-babel-default-header-args:bigquery '())
 
+(defun bilus-escape-percent (str-val)
+  (save-match-data
+    (replace-regexp-in-string "%" "%%" str-val)))
+
+
 (defun bilus-escape-quotes (str-val)
   "Return STR-VAL with every double-quote escaped with backslash."
   (save-match-data
     (replace-regexp-in-string "'" "\\\\'" str-val)))
+
+(defun bilus-escape (str-val)
+  (bilus-escape-percent (bilus-escape-quotes str-val)))
 
 ;; This function expands the body of a source code block by doing
 ;; things like prepending argument definitions to the body, it should
@@ -75,7 +85,7 @@ This function is called by `org-babel-execute-src-block'"
          (full-body (org-babel-expand-body:bigquery
                      body params processed-params))
          (opts (or (cdr (assoc :cmdline params)) ""))
-         (cmd (concat "bq query --use_legacy_sql=false --max_rows=1000 " opts " '" (bilus-escape-quotes body) "' || true")))
+         (cmd (concat "bq query --use_legacy_sql=false --max_rows=1000 " opts " '" (bilus-escape body) "' || true")))
     ;; actually execute the source-code block either in a session or
     ;; possibly by dropping it to a temporary file and evaluating the
     ;; file.

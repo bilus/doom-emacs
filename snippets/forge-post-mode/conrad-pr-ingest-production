@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: conrad-pr-ingest-production
+# key: conrad-pr-ingest-production
+# --
+- [ ] :x: Change has been tested and deployed to staging from master
+- [ ] :x: Sanity checks passed (\`make check\`)
+- [ ] :x: \`make new_{major,minor,patch}_version\`
+  - [ ] :x: All service/tier changes are within the stated scope of the PR
+  - [ ] :x: Version bumped
+  - [ ] :x: All service/tier version changes documented in CHANGELOG.rst
+  - [ ] :x: All value/secret updates documented in CHANGELOG.rst
+- [ ] :x: Monitoring in place
+- [ ] :x: Webinject tests for new API endpoint
+- [ ] :x: Datadog dashboards up to date
+  - [ ] :x: RGY dashboard
+  - [ ] :x: Service-specific dashboard(s)

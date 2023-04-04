@@ -4,6 +4,43 @@
 ;;; TODO: Move bq query to bigquery-mode.
 
 
+;;; Formatting of tables in dbt-unit-testing test cases
+;;;
+(defun bilus-format-table ()
+  (interactive)
+  (let ((start (bilus--find-indentation-start))
+            (end (bilus--find-indentation-end)))
+        (bilus--dbt-to-org-table start end)
+        (org-table-align)
+        (let ((start (bilus--find-indentation-start))
+              (end (bilus--find-indentation-end)))
+          (bilus--org-table-to-dbt start end))))
+
+(defun bilus--dbt-to-org-table (start end)
+  (replace-regexp-in-region "^\\([[:space:]]+\\)" "\\1| " start end))
+
+(defun bilus--org-table-to-dbt (start end)
+  (replace-regexp-in-region "^\\([[:space:]]+\\)| " "\\1" start end)
+  (replace-regexp-in-region "|$" "" start end))
+
+(defun bilus--find-indentation-end ()
+  (save-excursion
+    (let ((start-indent (current-indentation)))
+      (while (= (current-indentation) start-indent)
+        (forward-line 1)))
+    (point)))
+
+(defun bilus--find-indentation-start ()
+  (save-excursion
+    (let ((start-indent (current-indentation)))
+      (while (= (current-indentation) start-indent)
+        (forward-line -1)))
+    (forward-line 1)
+    (point)))
+
+
+;; Running dbt
+
 (defun dbt--yaml-read-from-file (path)
   (let ((json-object-type 'hash-table))
     ;; TODO Drop yq dep, it's silly.
@@ -13,6 +50,13 @@
   "Return STR-VAL with every double-quote escaped with backslash."
   (save-match-data
     (replace-regexp-in-string "'" "\\\\'" str-val)))
+
+(defun dbt--escape-percent (str-val)
+  (save-match-data
+    (replace-regexp-in-string "%" "%%" str-val)))
+
+(defun dbt--escape (str-val)
+  (dbt--escape-percent (dbt--escape-quotes str-val)))
 
 (defun with-sentinel-message (fun msg &rest args)
   "Inhibit messages in all sentinels started by fun."
@@ -65,7 +109,9 @@
         (pop-to-buffer out-buf)))))
 
 (defun dbt--bq-query (sql opts)
-  (concat "bq query --use_legacy_sql=false --max_rows=50 " opts " '" (dbt--escape-quotes sql) "' || true"))
+  (let (escaped-sql (dbt--escape sql))
+    (message escaped-sql)
+    (concat "bq query --use_legacy_sql=false --max_rows=50 " opts " '" (dbt--escape sql) "' || true")))
 
 (defun dbt--project-yml-path ()
   (let* ((path (buffer-file-name))

@@ -20,10 +20,15 @@
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
 ;; (setq doom-font (font-spec :family "monospace" :size 14))
-(setq doom-font (font-spec :family "Hack" :size 13))
+;; (setq doom-font (font-spec :family "Hack" :size 12))
+(setq doom-variable-pitch-font (font-spec :family "Iosevka Aile" :size 12))
+
+;; (setq doom-font (font-spec :family "Iosevka Aile" :size 12))
+
+(setq doom-font (font-spec :family "Iosevka Term" :size 12))
 
 (unless (find-font doom-font)
-  (setq doom-font (font-spec :family "Fira Code" :size 13)))
+  (setq doom-font (font-spec :family "Fira Code" :size 12)))
 
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -103,7 +108,7 @@
 ;; I don’t use evil-escape-mode, so I may as well turn it off, I’ve heard it
 ;; contributes a typing delay. I’m not sure it’s much, but it is an extra
 ;; pre-command-hook that I don’t benefit from, so…
-(after! evil (evil-escape-mode nil))
+;; (after! evil (evil-escape-mode nil))
 
 ;;
 ;; Org mode
@@ -127,12 +132,12 @@
 ;;       :map org-mode-map
 ;;       :desc "Insert clipboard PNG" "P" #'bilus/org-insert-clipboard-image)
 
-(after! org-roam
-  (progn
-    ;; Enable org-roam minor mode.
-    (add-hook 'after-init-hook 'org-roam-mode)
-    ;; Support org-roam note capture from within Chrome.
-    (require 'org-roam-protocol)))
+;; (after! org-roam
+;;   (progn
+;;     ;; Enable org-roam minor mode.
+;;     (add-hook 'after-init-hook 'org-roam-mode)
+;;     ;; Support org-roam note capture from within Chrome.
+;;     (require 'org-roam-protocol)))
 
 ;; Searching notes.
 ;; Haven't been using it.
@@ -204,7 +209,15 @@
    :n "DEL" #'ivy-cider-browse-ns)))
 
 (setq cider-enhanced-cljs-completion-p nil)  ;; https://github.com/clojure-emacs/cider/issues/2714
+;; First install the package:
+(use-package flycheck-clj-kondo
+  :ensure t)
 
+;; then install the checker as soon as `clojure-mode' is loaded
+(use-package clojure-mode
+  :ensure t
+  :config
+  (require 'flycheck-clj-kondo))
 
 ;; (after! cider
 ;;   (defun clj-format ()
@@ -229,9 +242,13 @@
 
 ;; (add-hook 'before-save-hook 'gofmt-before-save)
 ;; (bilus-setup-go-lsp)
-(setq gofmt-command "goimports")
-
+;; (setq gofmt-command "goimports")
+(setq-hook! 'go-mode-hook +format-with-lsp nil)
+(setq gofmt-command "gofumpt")
 (add-hook 'before-save-hook 'gofmt-before-save)
+
+;; (remove-hook 'before-save-hook 'gofmt-before-save)
+
 (use-package! company-lsp
   :after (push 'company-lsp company-backends))
 
@@ -341,3 +358,47 @@
 
 (after! elm-mode
   (add-hook 'elm-mode-hook 'elm-format-on-save-mode))
+
+;; Show vterm popup on the right (SPC o t)
+(after! vterm
+  (set-popup-rule! "*doom:vterm-popup:*" :size 0.25 :vslot -4 :select t :quit nil :ttl t :side 'right))
+
+(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+
+(after! flx-ido
+  (flx-ido-mode)
+  (flx-ido-mode)
+  (flx-ido-mode)
+  )
+
+;; (add-hook 'dired-mode-hook
+;;           (lambda ()
+;;             (org-roam-mode 0)
+;;             ))
+
+;; Haskell
+(after! direnv
+  (use-package direnv
+    :ensure t
+    :config
+    (direnv-mode)))
+
+(use-package lsp-mode
+  :ensure t
+  :hook ((haskell-mode . lsp-deferred))
+  :commands (lsp lsp-deferred))
+
+(use-package lsp-haskell
+  :ensure t)
+
+
+
+(setq dired-listing-switches "-alh --group-directories-first")
+
+(setq org-mobile-directory "~/Library/Mobile Documents/iCloud~com~mobileorg~mobileorg/Documents")
+
+(after! chatgpt
+  (require 'python))
+
+(map! :leader
+      :desc "Chatgpt" "b c" #'chatgpt-query)

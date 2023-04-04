@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dbt_drawer_tpx_prod
+# key: dbt_drawer_tpx_prod
+# --
+:PROPERTIES:
+:header-args:bigquery: :cmdline "--project_id tpx-engineering --dataset_id prod_tpx_data"
+:END:

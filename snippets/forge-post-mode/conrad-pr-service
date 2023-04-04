@@ -1,0 +1,48 @@
+# -*- mode: snippet -*-
+# name: conrad-pr-service
+# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
+# key: conrad-pr-service
+# --
+### Review checklist:
+
+<!--
+Submitter Instructions:
+
+Any items in the checklist that do not apply to this PR should be struck
+through (using surrounding tilde characters, ~like so~) and a note explaining
+why added as a sub-point under that item.
+
+If this PR affects multiple services, add a header with the service name
+before the checklist and duplicate the checklist for each service.  For
+example:
+
+#### conrad-ingest-matcher
+
+- [ ] :x: Check stuff
+
+
+#### conrad-ingest-selector
+
+- [ ] :x: Check stuff
+
+If this PR also includes library update(s) or staging deployment(s), add a
+header to this checklist for this service and copy the relevant checklists from
+the template(s) in .github/PULL_REQUEST_TEMPLATE/ here as well.
+
+To signal to the reviewer that you as the submitter have checked each item,
+replace each ':x:' with ':heavy_check_mark:'; the reviewer will use the
+rendered checkboxes in the web interface.
+
+Vim command for check mark replacement:
+%s/:x:/:heavy_check_mark:/gc
+-->
+
+- [ ] :x: \`make new_{major,minor,patch}_version\`
+- [ ] :x: Dependencies up to date
+    - [ ] :x: Version bumped
+    - [ ] :x: Changelog amended
+    - [ ] :x: New test(s) added
+    - [ ] :x: Sanity checks passed (\`make check\`)
+- [ ] :x: REST API is consistent with other APIs
+    - [ ] :x: Logging considered
+    - [ ] :x: Metrics considered

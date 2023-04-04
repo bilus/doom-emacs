@@ -109,3 +109,41 @@
 ;; (package! org-roam-server)
 
 (package! org-reveal)
+
+(package! format-all)
+
+(package! org-superstar)
+
+;; Needed by (editor +onsave).
+;; (package! evil-escape)
+
+(package! flx-ido)
+
+;; Haskell
+(package! direnv)
+
+
+;; org-encode-time issue: https://github.com/doomemacs/doomemacs/issues/6491
+(package! org
+  :recipe (:host github
+           :repo "emacs-straight/org-mode"
+           :files (:defaults "etc")
+           :depth 1
+           :build t
+           :pre-build
+           (with-temp-file "org-version.el"
+             (let ((version
+                    (with-temp-buffer
+                      (insert-file-contents (doom-path "lisp/org.el") nil 0 1024)
+                      (if (re-search-forward "^;; Version: \\([^\n-]+\\)" nil t)
+                          (match-string-no-properties 1)
+                        "Unknown"))))
+               (insert (format "(defun org-release () %S)\n" version)
+                       (format "(defun org-git-version (&rest _) \"%s-??-%s\")\n"
+                               version (cdr (doom-call-process "git" "rev-parse" "--short" "HEAD")))
+                       "(provide 'org-version)\n"))))
+  :pin "971eb6885ec996c923e955730df3bafbdc244e54")
+
+(package! chatgpt
+  :recipe (:host github :repo "joshcho/ChatGPT.el" :files ("dist" "*.el")))
+

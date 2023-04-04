@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dbt_drawer_tpx_mbilski
+# key: dbt_drawer_tpx_mbilski
+# --
+:PROPERTIES:
+:header-args:bigquery: :cmdline "--project_id tpx-engineering --dataset_id dev_mbilski_tpx_data"
+:END:
