@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dbt-conrad-production
+# key: dbt-conrad-production
+# --
+:PROPERTIES:
+:header-args:bigquery: :cmdline "--project_id conrad-staging --dataset_id conradIPContent_v4"
+:END:

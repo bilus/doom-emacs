@@ -35,7 +35,8 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 ;; (setq doom-theme 'doom-dracula)
-(setq doom-theme 'doom-nord-light)
+;; (setq doom-theme 'doom-nord-light)
+(load-theme 'modus-operandi)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -177,6 +178,9 @@
              (switch-to-buffer fish)))
     (ansi-term "/usr/local/bin/fish")))
 
+(setq shell-file-name (executable-find "zsh"))
+
+
 (map! :leader
       :desc "Fish term" "§" #'bilus/fish)
 
@@ -188,7 +192,7 @@
 ;;
 
 ;; Auto-format using tide.
-(add-hook 'before-save-hook 'tide-format-before-save)
+;; (add-hook 'before-save-hook 'tide-format-before-save)
 
 
 ;;
@@ -203,10 +207,10 @@
 
 (map!
  (:after clojure-mode
-  (:map clojure-mode-map
-   :leader
-   :n "\\" #'ivy-cider-apropos
-   :n "DEL" #'ivy-cider-browse-ns)))
+         (:map clojure-mode-map
+          :leader
+          :n "\\" #'ivy-cider-apropos
+          :n "DEL" #'ivy-cider-browse-ns)))
 
 (setq cider-enhanced-cljs-completion-p nil)  ;; https://github.com/clojure-emacs/cider/issues/2714
 ;; First install the package:
@@ -238,14 +242,62 @@
 ;;
 ;; Golang
 ;;
-;; (setq gofmt-command "goimports")
+
+(add-hook 'before-save-hook 'gofmt-before-save)
+
+;; (bilus-setup-go-lsp)
+(setq-hook! 'go-mode-hook +format-with-lsp nil)
+
+(setq gofmt-command "goimports")
+;; (setq gofmt-command "gofumpt")
+
+
 
 ;; (add-hook 'before-save-hook 'gofmt-before-save)
-;; (bilus-setup-go-lsp)
-;; (setq gofmt-command "goimports")
-(setq-hook! 'go-mode-hook +format-with-lsp nil)
-(setq gofmt-command "gofumpt")
-(add-hook 'before-save-hook 'gofmt-before-save)
+
+;; (use-package! flymake-go-staticcheck
+;;   :after (add-hook 'go-mode-hook #'flymake-go-staticcheck-enable))
+
+(use-package flycheck
+  :defer t
+  :hook (go-mode . flycheck-mode)
+  :config
+  (defvar-local flycheck-local-checkers nil)
+  (defun +flycheck-checker-get(fn checker property)
+    (or (alist-get property (alist-get checker flycheck-local-checkers))
+        (funcall fn checker property)))
+  (advice-add 'flycheck-checker-get :around '+flycheck-checker-get))
+
+(use-package go-mode
+  :defer t
+  :hook (go-mode . lsp-deferred)
+  :config
+  (defun lsp-go-install-save-hooks ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t))
+  (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+
+  (flycheck-define-checker golangci-lint
+    "A Go syntax checker using golangci-lint that's 5x faster than gometalinter
+
+See URL `https://github.com/golangci/golangci-lint'."
+    :command ("golangci-lint" "run" "--out-format=checkstyle" "--deadline=1m" ".")
+    :error-parser flycheck-parse-checkstyle
+    :error-patterns
+    ((error line-start (file-name) ":" line ":" column ": " (message) line-end)
+     (error line-start (file-name) ":" line ":" (message) line-end))
+    :modes go-mode
+    :predicate flycheck-buffer-saved-p)
+  (add-to-list 'flycheck-checkers 'golangci-lint)
+
+  (defun dsh/flycheck-golangci-lint-setup ()
+    (setq flycheck-local-checkers
+          '((lsp . ((next-checkers . ((warning . golangci-lint))))))))
+  (add-hook 'go-mode-hook #'dsh/flycheck-golangci-lint-setup))
+
+;; debugger support
+;; https://emacs-lsp.github.io/dap-mode/page/configuration/#go
+;; (require 'dap-dlv-go) -- needs treesitter
 
 ;; (remove-hook 'before-save-hook 'gofmt-before-save)
 
@@ -293,6 +345,50 @@
 (bilus/setup-smerge-hydra)
 (setq auth-sources '("~/.authinfo"))  ;; Have forge use unencrypted file.
 
+;; Show recent branches in magit.
+(defvar exp-feat/recent-branches (make-hash-table :test 'equal))
+
+(defcustom exp-feat/recent-branches-limits 5
+  "Limits" :type 'integer :risky t)
+
+(defun exp-feat/magit-insert-recent-branches nil
+  "Insert recent branches"
+  (let* ((dir (magit-toplevel))
+         (curr-branch (magit-get-current-branch))
+         (prev-branch (magit-get-previous-branch))
+         (rbs (--> (gethash dir exp-feat/recent-branches)
+                   (nconc (list prev-branch curr-branch) it)
+                   (-distinct it)
+                   (-filter (lambda (a) (and a (not (equal a curr-branch)))) it))))
+    (when rbs
+      (when (> (length rbs) exp-feat/recent-branches-limits)
+        (--> (1- exp-feat/recent-branches-limits)
+             (nthcdr it rbs)
+             (setcdr it nil)))
+      (puthash dir rbs exp-feat/recent-branches)
+      (magit-insert-section (rb "rb")
+        (magit-insert-heading "Recent branches")
+        (dolist (it-branch rbs)
+          (let ((output (magit-rev-format "%h %s" it-branch)))
+            (string-match "^\\([^ ]+\\) \\(.*\\)" output)
+            (magit-bind-match-strings (commit summary) output
+              (when (and t (equal summary ""))
+                (setq summary "(no commit message)"))
+              (magit-insert-section (branch it-branch)
+                (insert (propertize commit
+                                    'font-lock-face 'magit-hash) ?\s)
+                (insert (propertize it-branch
+                                    'font-lock-face 'magit-branch-local) ?\s)
+                (insert (funcall magit-log-format-message-function
+                                 it-branch summary) ?\n)))))))))
+
+(after! magit
+  (magit-add-section-hook 'magit-status-sections-hook
+                          'exp-feat/magit-insert-recent-branches
+                          'magit-insert-stashes
+                          'append)  )
+
+;;
 ;;
 ;; Ruby
 ;;
@@ -311,7 +407,8 @@
 ;;
 ;; Org mode
 ;;
-(setq org-plantuml-jar-path (expand-file-name "~/.emacs.d/bin/plantuml.jar"))
+;; (setq plantuml-jar-path (expand-file-name "~/.emacs.d/bin/plantuml.jar"))
+;; (setq plantuml-default-exec-mode 'jar)
 
 ;;
 ;; Experimental
@@ -377,11 +474,11 @@
 ;;             ))
 
 ;; Haskell
-(after! direnv
-  (use-package direnv
-    :ensure t
-    :config
-    (direnv-mode)))
+;; (after! direnv
+;;   (use-package direnv
+;;     :ensure t
+;;     :config
+;;     (direnv-mode)))
 
 (use-package lsp-mode
   :ensure t
@@ -390,6 +487,24 @@
 
 (use-package lsp-haskell
   :ensure t)
+
+(after! lsp-haskell
+  (setq lsp-haskell-formatting-provider "floskell"))
+
+;; (setq haskell-stylish-on-save t)
+(setq haskell-mode-stylish-haskell-path "brittany")
+
+(defun haskell-stylish-on-save ()
+  "Function formats haskell buffer with brittany on save."
+  (when (eq major-mode 'haskell-mode)
+    (haskell-mode-stylish-buffer)
+    ;;(shell-command-to-string (format "brittany --write-mode inplace %s" buffer-file-name))
+    ;;(revert-buffer :ignore-auto :noconfirm)
+    ))
+
+(add-hook 'after-save-hook 'haskell-stylish-on-save)
+
+(add-hook 'haskell-mode-hook (progn (remove-hook 'before-save-hook #'lsp-format-buffer t)))
 
 
 
@@ -402,3 +517,236 @@
 
 (map! :leader
       :desc "Chatgpt" "b c" #'chatgpt-query)
+
+;; Disable persistent undo history. At least temporarily due to "can not recover" errors.
+(remove-hook 'undo-fu-mode-hook #'global-undo-fu-session-mode)
+
+;; Use when getting Too many files open error.
+(defun file-notify-rm-all-watches ()
+  "Remove all existing file notification watches from Emacs."
+  (interactive)
+  (maphash
+   (lambda (key _value)
+     (file-notify-rm-watch key))
+   file-notify-descriptors))
+
+
+;; https://github.com/doomemacs/doomemacs/issues/5317
+(setq org-clock-auto-clock-resolution nil)
+
+;; (use-package! elixir-ts-mode
+;;   :mode "\\.heex\\'")
+
+;; (after! elixir-ts-mode
+;;     (add-hook! elixir-mode #'elixir-ts-mode))
+
+
+(defun bilus-dts-projects-todo ()
+  (let ((dts-dir "/Users/martinb/dev/Tooploox/DTS/"))
+    (mapcar
+     (lambda (proj) (concat dts-dir proj "/todo.org"))
+     (list "conrad" "mmd"))))
+
+(defun bilus-todos ()
+  (append (bilus-dts-projects-todo)
+          (list  "/Users/martinb/git/org/todo.org")))
+
+
+;; Hiding DONE org tasks
+(defun bilus/org-get-folded-state ()
+  (cond
+   ((not (or (org-at-item-p) (org-at-heading-p)))
+    'not-at-node)
+   ((org-before-first-heading-p)
+    'not-at-node)
+   (t
+    (let (eoh eol eos has-children children-skipped struct)
+      ;; First, determine end of headline (EOH), end of subtree or item
+      ;; (EOS), and if item or heading has children (HAS-CHILDREN).
+      (save-excursion
+        (if (org-at-item-p)
+            (progn
+              (beginning-of-line)
+              (setq struct (org-list-struct))
+              (setq eoh (point-at-eol))
+              (setq eos (org-list-get-item-end-before-blank (point) struct))
+              (setq has-children (org-list-has-child-p (point) struct)))
+          (org-back-to-heading)
+          (setq eoh (save-excursion (outline-end-of-heading) (point)))
+          (setq eos (save-excursion (org-end-of-subtree t t)
+                                    (when (bolp) (backward-char)) (point)))
+          (setq has-children
+                (or (save-excursion
+                      (let ((level (funcall outline-level)))
+                        (outline-next-heading)
+                        (and (org-at-heading-p t)
+                             (> (funcall outline-level) level))))
+                    (save-excursion
+                      (org-list-search-forward (org-item-beginning-re) eos t)))))
+        ;; Determine end invisible part of buffer (EOL)
+        (beginning-of-line 2)
+        (while (and (not (eobp)) ;; this is like `next-line'
+                    (get-char-property (1- (point)) 'invisible))
+          (goto-char (next-single-char-property-change (point) 'invisible))
+          (and (eolp) (beginning-of-line 2)))
+        (setq eol (point)))
+      (cond
+       ((= eos eoh)
+        'empty-node)
+       ((or (>= eol eos)
+            (not (string-match "\\S-" (buffer-substring eol eos))))
+        'folded)
+       (t
+        'not-folded))))))
+
+(defun bilus/org-tree-can-fold-p ()
+  (not (member (bilus/org-get-folded-state) (list 'folded 'empty-node))))
+
+(defun bilus/org-cycle-until-folded ()
+  (while (bilus/org-tree-can-fold-p)
+    (org-cycle)))
+
+(defun bilus/org-hide-done-entries-in-range (start end)
+  (save-excursion
+    (goto-char end)
+    (while (and (outline-previous-heading) (> (point) start))
+      (when (org-entry-is-done-p)
+        (bilus/org-cycle-until-folded)))))
+
+(defun bilus/org-hide-done-entries-in-region (start end)
+  (interactive "r")
+  (bilus/org-hide-done-entries-in-range start end))
+
+(defun bilus/org-hide-done-entries-in-buffer ()
+  (interactive)
+  (bilus/org-hide-done-entries-in-range (point-min) (point-max)))
+
+
+;; (evil-collection-define-key 'normal 'smerge-mode-map
+;;   "n" 'smerge-next
+;;   "p" 'smerge-prev
+;;   "k" 'smerge-prev
+;;   "j" 'evil-next-line
+;;   "k" 'evil-previous-line
+;;   "a" 'smerge-keep-all
+;;   "b" 'smerge-keep-base
+;;   "m" 'smerge-keep-mine
+;;   "o" 'smerge-keep-other
+;;   "c" 'smerge-keep-current
+;;   "C" 'smerge-combine-with-next
+;;   "R" 'smerge-refine
+;;   "u" 'undo-tree-undo)
+(general-define-key
+ :states 'normal
+ :modes 'smerge-mode
+ :prefix ", d"
+ "n" 'smerge-next
+ "p" 'smerge-prev
+ "l" 'smerge-keep-lower
+ "u" 'smerge-keep-upper
+ "a" 'smerge-keep-all
+ "X" 'smerge-keep-base
+ "x" 'smerge-swap
+ "r" 'smerge-resolve)
+
+
+
+
+(add-to-list 'auto-mode-alist '("\\.templ\\'" . web-mode))
+
+
+;; accept completion from copilot and fallback to company
+(use-package! copilot
+  :hook (prog-mode . copilot-mode)
+  :bind (:map copilot-completion-map
+              ("<right>" . 'copilot-accept-completion)
+                                        ;("<tab>" . 'copilot-accept-completion)
+                                        ;("TAB" . 'copilot-accept-completion)
+              ("C-TAB" . 'copilot-accept-completion-by-word)
+              ("C-<tab>" . 'copilot-accept-completion-by-word)
+              ("M-n" . 'copilot-next-completion)
+              ("M-p" . 'copilot-previous-completion)))
+
+;; https://github.com/zerolfx/copilot.el/issues/193
+(after! (evil copilot)
+  ;; Define the custom function that either accepts the completion or does the default behavior
+  (defun my/copilot-tab-or-default ()
+    (interactive)
+    (if (and (bound-and-true-p copilot-mode)
+             ;; Add any other conditions to check for active copilot suggestions if necessary
+             )
+        (copilot-accept-completion)
+      (evil-insert 1))) ; Default action to insert a tab. Adjust as needed.
+
+  ;; Bind the custom function to <tab> in Evil's insert state
+  (evil-define-key 'insert 'global (kbd "<tab>") 'my/copilot-tab-or-default))
+
+(after! copilot
+  (add-to-list 'warning-suppress-types '(copilot copilot-no-mode-indent)))
+
+
+;; Styling for org mode.
+(progn
+  ;; Minimal UI
+  (package-initialize)
+  (menu-bar-mode -1)
+
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+
+
+  ;; Choose some fonts
+  ;; (set-face-attribute 'default nil :family "Iosevka")
+  ;; (set-face-attribute 'variable-pitch nil :family "Iosevka Aile")
+  ;; (set-face-attribute 'org-modern-symbol nil :family "Iosevka")
+
+  ;; Add frame borders and window dividers
+  (modify-all-frames-parameters
+   '((right-divider-width . 20)
+     (internal-border-width . 20)))
+  (dolist (face '(window-divider
+                  window-divider-first-pixel
+                  window-divider-last-pixel))
+    (face-spec-reset-face face)
+    (set-face-foreground face (face-attribute 'default :background)))
+  (set-face-background 'fringe (face-attribute 'default :background))
+
+  (setq
+   ;; Edit settings
+   org-auto-align-tags nil
+   org-tags-column 0
+   org-catch-invisible-edits 'show-and-error
+   org-special-ctrl-a/e t
+   org-insert-heading-respect-content t
+
+   ;; Org styling, hide markup etc.
+   org-hide-emphasis-markers t
+   org-pretty-entities t
+   org-ellipsis "…"
+
+   ;; Agenda styling
+   org-agenda-tags-column 0
+   org-agenda-block-separator ?─
+   org-agenda-time-grid
+   '((daily today require-timed)
+     (800 1000 1200 1400 1600 1800 2000)
+     " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+   org-agenda-current-time-string
+   "◀── now ─────────────────────────────────────────────────")
+
+  (global-org-modern-mode))
+
+(defun tvaughan/untabify ()
+  "Preserve initial tab when 'makefile-mode."
+  (interactive)
+  (save-excursion
+    (if (derived-mode-p 'makefile-mode)
+        (progn
+          (goto-char (point-min))
+          (while (not (eobp))
+            (skip-chars-forward "\t")
+            (untabify (point) (line-end-position))
+            (forward-line 1)))
+      (untabify (point-min) (point-max)))))
+
+(add-hook 'before-save-hook 'tvaughan/untabify)

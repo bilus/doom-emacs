@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dbt-drawer-conrad-producton-api
+# key: dbt-drawer-conrad-producton-api
+# --
+:PROPERTIES:
+:header-args:bigquery: :cmdline "--project_id conrad-production-api --dataset_id conradIPContent_v4"
+:END:
