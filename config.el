@@ -342,7 +342,7 @@ See URL `https://github.com/golangci/golangci-lint'."
 ;; Magit
 ;;
 ;;
-(bilus/setup-smerge-hydra)
+;; (bilus/setup-smerge-hydra)
 (setq auth-sources '("~/.authinfo"))  ;; Have forge use unencrypted file.
 
 ;; Show recent branches in magit.
@@ -750,3 +750,30 @@ See URL `https://github.com/golangci/golangci-lint'."
       (untabify (point-min) (point-max)))))
 
 (add-hook 'before-save-hook 'tvaughan/untabify)
+
+(defun bilus-compilation-hook ()
+  (when (not (get-buffer-window "*compilation*"))
+    (save-selected-window
+      (save-excursion
+        (let* ((w (split-window-horizontally)))
+          (select-window w)
+          (switch-to-buffer "*compilation*")
+          ;; (shrink-window (/ (frame-width) 4))
+          )))))
+(add-hook 'compilation-mode-hook 'bilus-compilation-hook)
+
+(after! treemacs
+  (treemacs-follow-mode))
+
+;; (after! centaur-tabs
+;;   (centaur-tabs-group-by-projectile-project)
+;;   (setq
+;;    centaur-tabs-style "bar"
+;;    centaur-tabs-height 15)
+;;   (centaur-tabs-change-fonts (face-attribute 'default :font) 110))
+
+(after! noccur
+  (map!
+   :leader "sn" #'noccur-dired)
+  (map!
+   :leader "pn" #'noccur-project))

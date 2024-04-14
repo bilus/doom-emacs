@@ -20,8 +20,8 @@
 
        :completion
        (company +childframe)           ; the ultimate code completion backend
-       ;; (helm
-       ;;  +fuzzy)              ; the *other* search engine for love and life
+       ;;(helm
+       ;; +fuzzy)              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
                                         ;(ivy               ; a search engine for love and life
                                         ; +fuzzy
@@ -46,8 +46,8 @@
         +defaults)       ; default popup rules
        ;; pretty-code       ; replace bits of code with pretty symbols
        (ligatures +extra) ; replacement for pretty-code
-       ;;tabs              ; an tab bar for Emacs
-       ;;treemacs          ; a project drawer, like neotree but cooler
+       ;; * tabs              ; an tab bar for Emacs
+       (treemacs +lsp)          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
        vi-tilde-fringe   ; fringe tildes to mark beyond EOB

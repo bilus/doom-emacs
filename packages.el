@@ -158,3 +158,8 @@
 (package! org-modern)
 
 (package! sqlite3)
+
+(package! vertico-prescient)
+(package! prescient)
+
+(package! noccur)
